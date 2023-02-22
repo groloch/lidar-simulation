@@ -3,7 +3,7 @@ import numpy as np
 import env
 
 
-SPEED = 20
+SPEED = 1000
 
 class Wall(pygame.sprite.Sprite):
     def __init__(self, x, y, w, h):
@@ -13,7 +13,7 @@ class Wall(pygame.sprite.Sprite):
         self.rect = self.surf.get_rect(center = (x, y))
 
 class Lidar():
-    def __init__(self, surf, x, y, dangle, walls, div):
+    def __init__(self, surf, x, y, dangle, walls, div, round_amount):
         self.surf = surf
         self.x = x
         self.y = y
@@ -23,6 +23,9 @@ class Lidar():
         self.beams = [LaserBeam(self, surf, x, y, self.angle)]
         self.div = div
         self.data = [[2 * np.pi * k / div, 0, 0] for k in range(div)]
+        self.done = False
+        self.round = 0
+        self.round_amount = round_amount
 
     def draw(self):
         pygame.draw.circle(self.surf, (255, 0, 0), (self.x, self.y), 10)
@@ -34,6 +37,9 @@ class Lidar():
         self.angle += self.dangle
         if self.angle > 2 * np.pi:
             self.angle -= 2 * np.pi
+            self.round+=1
+            if self.round == self.round_amount:
+                self.done = True
         self.beams.append(LaserBeam(self, self.surf, self.x, self.y, self.angle))
         for beam in self.beams:
             beam.update()
@@ -46,7 +52,7 @@ class Lidar():
                 self.beams.remove(b)
         ratio = env.FPS * SPEED
         index = int(self.div * beam.angle / (np.pi * 2))
-        self.data[index] = [self.data[index][0], self.data[index][1] + beam.time + 10, self.data[index][2] + 1]
+        self.data[index] = [self.data[index][0], self.data[index][1] + beam.time + 8, self.data[index][2] + 1]
 
 class Hitbox():
     def __init__(self, x, y, w, h):

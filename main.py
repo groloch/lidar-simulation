@@ -1,4 +1,4 @@
 import env
 
 
-env.display()
+env.run()

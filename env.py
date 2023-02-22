@@ -23,30 +23,52 @@ all_sprites.add(w1)
 all_sprites.add(w2)
 
 walls = [w1, w2]
-lidar = Lidar(displaysurface, 200, 200, 0.1, walls, 1000)
+lidar = Lidar(displaysurface, 200, 200, 0.1, walls, 1000, 10)
 renderer = Renderer(lidar)
+map = []
+vertices = []
 
-def display():
+def run():
+    global lidar, renderer, map, vertices
 
-    
     while True:
-        for event in pygame.event.get():
-            if event.type == QUIT:
-                pygame.quit()
+        while True:
+            for event in pygame.event.get():
+                if event.type == QUIT:
+                    pygame.quit()
+            
+            displaysurface.fill((255,255,255))
         
-        displaysurface.fill((255,255,255))
-    
-        for entity in all_sprites:
-            displaysurface.blit(entity.surf, entity.rect)
+            for entity in all_sprites:
+                displaysurface.blit(entity.surf, entity.rect)
+            
+            for i in range(len(map)):
+                if vertices[i]:
+                    pygame.draw.line(displaysurface, (255, 255, 0), (map[i-1][0] + 720, map[i-1][1]), (map[i][0] + 720, map[i][1]), 4)
+                else:
+                    pygame.draw.line(displaysurface, (255, 128, 0), (map[i-1][0] + 720, map[i-1][1]), (map[i][0] + 720, map[i][1]), 4)
 
-        lidar.update()
+            lidar.update()
+            if lidar.done:
+                m2 = renderer.scale()
+                if len(map) == 0:
+                    map = m2
+                else:
+                    pass
+                vertices = renderer.graph(map) 
+                break
+            pygame.draw.line(displaysurface, (0, 0, 0), (720, 0), (720, 720))
 
-        pygame.draw.line(displaysurface, (0, 0, 0), (720, 0), (720, 720))
+            renderer.update()
 
-        renderer.update()
 
-        pygame.display.update()
-        fps.tick(FPS)
+
+            pygame.display.update()
+            fps.tick(FPS)
+        lidar = Lidar(displaysurface, 200, 300, 0.1, walls, 1000, 7)
+        renderer = Renderer(lidar)
+        
+
 
 def isValid(x, y):
     if x < 0 or y < 0:
